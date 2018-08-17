@@ -20,7 +20,7 @@ defmodule CodeDeploy do
       service_name: service_name,
       app_user: app_user,
       app_group: config[:app_group] || app_user,
-      org: config[:org],
+      project: config[:project],
       deploy_dir: config[:deploy_dir] || deploy_dir(config),
       mix_env: config[:mix_env] || Mix.env(),
       release_mutable_dir: config[:release_mutable_dir] || "/run/#{service_name}",
@@ -68,9 +68,9 @@ defmodule CodeDeploy do
     app = config[:app]
     service_name = config[:service_name] || String.replace(app, "_", "-")
     base_dir = config[:base_dir] || "/srv"
-    case Keyword.fetch(config, :org) do
-      {:ok, org} ->
-        Path.join([base_dir, org, service_name])
+    case Keyword.fetch(config, :project) do
+      {:ok, project} ->
+        Path.join([base_dir, project, service_name])
       :error ->
         Path.join([base_dir, service_name])
       end
