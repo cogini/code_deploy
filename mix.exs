@@ -8,14 +8,15 @@ defmodule CodeDeploy.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
-      systemd: systemd()
+      code_deploy: code_deploy()
     ]
   end
 
-  def systemd do
+  def code_deploy do
     [
       chroot: true,
       paranoia: true,
+      # validate_curl_opts: "--insecure -H 'X-Forwarded-Proto: https'",
     ]
   end
 

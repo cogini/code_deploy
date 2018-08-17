@@ -1,0 +1,33 @@
+version: 0.0
+os: linux
+files:
+  - source: data
+    destination: <%= deploy_dir %>/current
+  - source: codedeploy
+    destination: <%= deploy_dir %>/codedeploy
+  - source: systemd
+    destination: /lib/systemd/system/<%= deploy_dir %>/codedeploy
+permissions:
+  - object: <%= deploy_dir %>/current
+    owner: <%= deploy_user %>
+    group: <%= deploy_group %>
+  # Allow app user to run scripts
+  - object: <%= deploy_dir %>/current/bin/<%= app %>
+    owner: <%= app_user %>
+    group: <%= app_group %>
+    mode: 750
+  - object: <%= deploy_dir %>/current/releases/<%= version %>/<%= app %>.sh
+    owner: <%= app_user %>
+    group: <%= app_group %>
+    mode: 750
+hooks:
+  ApplicationStop:
+    - location: codedeploy/application-stop.sh
+  BeforeInstall:
+    - location: codedeploy/before-install.sh
+  AfterInstall:
+    - location: codedeploy/after-install.sh
+  ApplicationStart:
+    - location: codedeploy/application-start.sh
+  ValidateService:
+    - location: codedeploy/validate-service.sh

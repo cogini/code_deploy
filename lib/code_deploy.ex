@@ -10,22 +10,28 @@ defmodule CodeDeploy do
 
   def config(project_config) do
     app = to_string(project_config[:app])
+    version = project_config[:version] 
     config = project_config[:systemd] || []
-    config = [app: app] ++ config
+    config = [app: app, version: version] ++ config
     service_name = config[:service_name] || String.replace(app, "_", "-")
     app_user = config[:app_user] || app
+    deploy_user = config[:deploy_user] || app
+
+    http_listen_port = config[:http_listen_port] || 4000  
 
     [
       app: app,
       service_name: service_name,
       app_user: app_user,
       app_group: config[:app_group] || app_user,
+      deploy_user: deploy_user,
+      deploy_group: config[:deploy_group] || deploy_user,
       project: config[:project],
       deploy_dir: config[:deploy_dir] || deploy_dir(config),
       mix_env: config[:mix_env] || Mix.env(),
       release_mutable_dir: config[:release_mutable_dir] || "/run/#{service_name}",
       env_lang: config[:env_lang] || "en_US.UTF-8",
-      env_port: config[:env_port] || 4000,
+      env_port: http_listen_port,
       conform_conf_path: config[:conform_conf_path],
       limit_nofile: config[:limit_nofile] || 65535,
       umask: config[:umask] || "0027",
@@ -46,6 +52,11 @@ defmodule CodeDeploy do
       inaccessible_paths: config[:inaccessible_paths] || [],
       systemd_version: config[:systemd_version] || 235,
       paranoia: config[:paranoia],
+      validate_hostname: config[:validate_hostname] || "localhost",
+      validate_port: config[:validate_port] || http_listen_port,
+      validate_attempts: config[:valiate_attempts] || 10,
+      validate_curl_opts: config[:valiate_curl_opts] || "",
+      validate_success_http_code: config[:valiate_success_http_code] || 200,
     ]
 
   end
