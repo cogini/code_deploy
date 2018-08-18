@@ -3,6 +3,7 @@ defmodule CodeDeploy do
   Documentation for CodeDeploy.
   """
   @app :code_deploy
+  @template_dir "code_deploy"
 
   def config do
     config(Mix.Project.config())
@@ -10,22 +11,24 @@ defmodule CodeDeploy do
 
   def config(project_config) do
     app = to_string(project_config[:app])
-    version = project_config[:version] 
-    config = project_config[:systemd] || []
+    version = project_config[:version]
+    config = project_config[:code_deploy] || []
     config = [app: app, version: version] ++ config
     service_name = config[:service_name] || String.replace(app, "_", "-")
     app_user = config[:app_user] || app
     deploy_user = config[:deploy_user] || app
 
-    http_listen_port = config[:http_listen_port] || 4000  
+    http_listen_port = config[:http_listen_port] || 4000
 
     [
       app: app,
       service_name: service_name,
+
       app_user: app_user,
       app_group: config[:app_group] || app_user,
       deploy_user: deploy_user,
       deploy_group: config[:deploy_group] || deploy_user,
+
       project: config[:project],
       deploy_dir: config[:deploy_dir] || deploy_dir(config),
       mix_env: config[:mix_env] || Mix.env(),
@@ -36,6 +39,7 @@ defmodule CodeDeploy do
       limit_nofile: config[:limit_nofile] || 65535,
       umask: config[:umask] || "0027",
       restart_sec: config[:restart_sec] || 5,
+
       runtime_directory: config[:runtime_directory] || service_name,
       runtime_directory_mode: config[:runtime_directory_mode] || "0750",
       runtime_directory_preserve: config[:runtime_directory_preserve] || "no",
@@ -45,6 +49,7 @@ defmodule CodeDeploy do
       logs_directory_mode: config[:logs_directory_mode] || "0750",
       state_directory: config[:state_directory] || service_name,
       state_directory_mode: config[:state_directory_mode] || "0750",
+
       chroot: config[:chroot],
       root_directory: config[:root_directory],
       read_write_paths: config[:read_write_paths] || [],
@@ -62,9 +67,15 @@ defmodule CodeDeploy do
   end
 
   def template(name, params \\ []) do
-    Application.app_dir(@app, Path.join("priv", "templates"))
-    |> Path.join("#{name}.eex")
-    |> template_path(params)
+    template_name = "#{name}.eex"
+    override_path = Path.join([@template_dir, template_name])
+    if File.exists(override_path) do
+      template_path(override_path)
+    else
+      Application.app_dir(@app, Path.join("priv", "templates"))
+      |> Path.join(template_name)
+      |> template_path(params)
+    end
   end
 
   @spec template_path(String.t(), Keyword.t()) :: {:ok, String.t()} | {:error, term}
