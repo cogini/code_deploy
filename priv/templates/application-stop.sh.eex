@@ -1,3 +1,3 @@
 #!/bin/sh
 
-systemctl stop <% service_name %>
+systemctl stop <%= service_name %>

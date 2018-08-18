@@ -1,33 +1,33 @@
 version: 0.0
 os: linux
 files:
-  - source: data
-    destination: <%= deploy_dir %>/current
-  - source: codedeploy
-    destination: <%= deploy_dir %>/codedeploy
+  - source: release
+    destination: <%= release_dir %>
+  - source: code_deploy
+    destination: <%= base_dir %>/code_deploy
   - source: systemd
-    destination: /lib/systemd/system/<%= deploy_dir %>/codedeploy
+    destination: /
 permissions:
-  - object: <%= deploy_dir %>/current
+  - object: <%= release_dir %>
     owner: <%= deploy_user %>
     group: <%= deploy_group %>
   # Allow app user to run scripts
-  - object: <%= deploy_dir %>/current/bin/<%= app %>
+  - object: <%= release_dir %>/bin/<%= app %>
     owner: <%= app_user %>
     group: <%= app_group %>
     mode: 750
-  - object: <%= deploy_dir %>/current/releases/<%= version %>/<%= app %>.sh
+  - object: <%= release_dir %>/releases/<%= version %>/<%= app %>.sh
     owner: <%= app_user %>
     group: <%= app_group %>
     mode: 750
 hooks:
   ApplicationStop:
-    - location: codedeploy/application-stop.sh
+    - location: code_deploy/application-stop.sh
   BeforeInstall:
-    - location: codedeploy/before-install.sh
+    - location: code_deploy/before-install.sh
   AfterInstall:
-    - location: codedeploy/after-install.sh
+    - location: code_deploy/after-install.sh
   ApplicationStart:
-    - location: codedeploy/application-start.sh
+    - location: code_deploy/application-start.sh
   ValidateService:
-    - location: codedeploy/validate-service.sh
+    - location: code_deploy/validate-service.sh

@@ -3,20 +3,21 @@ Description=<%= app %>
 After=local-fs.target network.target
 
 # https://www.freedesktop.org/software/systemd/man/systemd.exec.html
+# https://hexdocs.pm/distillery/use-with-systemd.html
+# https://github.com/systemd/systemd/blob/master/NEWS
+
 [Service]
 Type=simple
 User=<%= app_user %>
 Group=<%= app_group %>
-WorkingDirectory=<%= deploy_dir %>/current
-ExecStart=<%= deploy_dir %>/current/bin/<%= app %> foreground
-ExecStop=<%= deploy_dir %>/current/bin/<%= app %> stop
+WorkingDirectory=<%= release_dir %>
+ExecStart=<%= release_dir %>/bin/<%= app %> foreground
+ExecStop=<%= release_dir %>/bin/<%= app %> stop
 Environment=LANG=<%= env_lang %>
 Environment=MIX_ENV=<%= mix_env %>
 Environment=RELEASE_MUTABLE_DIR=<%= release_mutable_dir %>
-<%= if env_port do %>
 Environment=PORT=<%= env_port %>
-<% end %>
-<%= if conform_conf_path do %>
+<%= if conform do %>
 Environment=CONFORM_CONF_PATH=<%= conform_conf_path %>
 <% end %>
 # systemd ignores /etc/security/limits
@@ -30,31 +31,18 @@ RuntimeDirectory=<%= runtime_directory %>
 RuntimeDirectoryMode=<%= runtime_directory_mode %>
 <%= if systemd_version >= 235 do %>
 RuntimeDirectoryPreserve=<%= runtime_directory_preserve %>
-<% end %>
-<%= if configuration_directory do %>
-# Not supported on CentOS 7, Ubuntu 16.04 or Debian 9
 ConfigurationDirectory=<%= configuration_directory %>
 ConfigurationDirectoryMode=<%= configuration_directory_mode %>
-<% end %>
-<%= if logs_directory do %>
 LogsDirectory=<%= logs_directory %>
 LogsDirectoryMode=<%= logs_directory_mode %>
-<% end %>
-<%= if state_directory do %>
 StateDirectory=<%= state_directory %>
 StateDirectoryMode=<%= state_directory_mode %>
 <% end %>
 <%= if chroot do %>
-RootDirectory=<%= deploy_dir %>/current
-<%= if length(read_write_paths) > 0 do %>
-ReadWritePaths=<%= Enum.join(read_write_paths, " ") %>
-<% end %>
-<%= if length(read_only_paths) > 0 do %>
-ReadOnlyPaths=<%= Enum.join(read_only_paths, " ") %>
-<% end %>
-<%= if length(inaccessible_paths) > 0 do %>
-InaccessiblePaths=<%= Enum.join(inaccessible_paths, " ") %>
-<% end %>
+RootDirectory=<%= root_directory %>
+<%= if length(read_write_paths) > 0 do %>ReadWritePaths=<%= Enum.join(read_write_paths, " ") %><% end %>
+<%= if length(read_only_paths) > 0 do %>ReadOnlyPaths=<%= Enum.join(read_only_paths, " ") %><% end %>
+<%= if length(inaccessible_paths) > 0 do %>InaccessiblePaths=<%= Enum.join(inaccessible_paths, " ") %><% end %>
 <% end %>
 <%= if paranoia do %>
 NoNewPrivileges=yes
@@ -62,35 +50,24 @@ PrivateDevices=yes
 PrivateTmp=yes
 ProtectSystem=full
 ProtectHome=yes
-
 <%= if systemd_version >= 232 do %>
 PrivateUsers=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
 ProtectControlGroups=yes
 <% end %>
-
-<%= if systemd_version >= 233 do %>
-MountAPIVFS=yes
-<% end %>
-
-<%= if systemd_version >= 235 do %>
-LockPersonality=yes
-<% end %>
+<%= if systemd_version >= 233 do %>MountAPIVFS=yes<% end %>
 
 # RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 # SELinuxContext=
 # AppArmorProfile=
 # SmackProcessLabel=
 <% end %>
-
 # KillMode=process # default control-group
 # TimeoutSec=10
 # RemainAfterExit=no
 # https://elixirforum.com/t/distillery-node-is-not-running-and-non-zero-exit-code/3834
 # SuccessExitStatus=143
-
-# From distillery https://hexdocs.pm/distillery/use-with-systemd.html
 
 [Install]
 WantedBy=multi-user.target

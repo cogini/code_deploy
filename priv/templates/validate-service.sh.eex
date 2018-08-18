@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 counter=1
 
-while !( curl -s -o /dev/null -w "%{http_code}" -H "Host: <%= validate_hostname %>" <%= validate_curl_opts %> | grep "<% validate_success_http_code %>" ); do
+while !( curl -s -o /dev/null -w "%{http_code}" -H "Host: <%= validate_hostname %>" <%= validate_curl_opts %> | grep "<%= validate_success_string %>" ); do
   if [ $counter -le <%= validate_attempts %> ]
   then
     ((counter++))

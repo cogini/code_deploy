@@ -1,4 +1,4 @@
 #!/bin/sh
 
-systemctl enable <% service_name %>
+systemctl enable <%= service_name %>
 systemctl daemon-reload

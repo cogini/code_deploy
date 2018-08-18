@@ -14,8 +14,10 @@ defmodule CodeDeploy.MixProject do
 
   def code_deploy do
     [
+      conform: true,
       chroot: true,
       paranoia: true,
+      deploy_user: "deploy",
       # validate_curl_opts: "--insecure -H 'X-Forwarded-Proto: https'",
     ]
   end

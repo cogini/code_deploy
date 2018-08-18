@@ -26,7 +26,7 @@ defmodule Mix.Tasks.CodeDeploy.Revision do
     verbosity = Keyword.get(opts, :verbosity)
     Shell.configure(verbosity)
 
-    Mix.Task.run("release", [])
+    # Mix.Task.run("release", [])
 
     Shell.debug("Loading configuration..")
     config = CodeDeploy.config()
